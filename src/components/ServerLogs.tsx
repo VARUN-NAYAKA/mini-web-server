@@ -25,14 +25,14 @@ const ServerLogs = () => {
   };
 
   return (
-    <div className="flex flex-col h-[300px]">
+    <div className="flex flex-col h-[250px]">
       <ScrollArea className="flex-1 p-3" ref={scrollRef}>
         {logs.length === 0 ? (
-          <div className="h-full flex items-center justify-center text-gray-400 text-sm italic">
-            No logs available
+          <div className="h-full flex items-center justify-center text-gray-400 text-sm">
+            No logs
           </div>
         ) : (
-          <div className="space-y-1.5 font-mono text-xs">
+          <div className="space-y-1 font-mono text-xs">
             {logs.map((log, index) => (
               <div key={index} className={`${getLogClass(log.type)}`}>
                 <span className="text-gray-500">[{log.timestamp}]</span> {log.message}
@@ -46,10 +46,10 @@ const ServerLogs = () => {
           variant="ghost" 
           size="sm" 
           onClick={clearLogs} 
-          className="text-xs h-7"
+          className="text-xs h-6"
           disabled={logs.length === 0}
         >
-          Clear Logs
+          Clear
         </Button>
       </div>
     </div>

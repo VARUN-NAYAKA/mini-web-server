@@ -1,12 +1,11 @@
 
 import { useState } from "react";
-import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useServer } from "@/context/ServerContext";
 import { toast } from "sonner";
-import { FolderIcon, FileIcon, Code2Icon, ImageIcon, FileTextIcon } from "lucide-react";
+import { FolderIcon, FileIcon } from "lucide-react";
 
 const FileExplorer = () => {
   const { files, addFile, deleteFile } = useServer();
@@ -15,9 +14,6 @@ const FileExplorer = () => {
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
 
   const getFileIcon = (filename: string) => {
-    if (filename.endsWith(".html")) return <Code2Icon className="h-4 w-4" />;
-    if (filename.endsWith(".css")) return <FileTextIcon className="h-4 w-4" />;
-    if (filename.endsWith(".jpg") || filename.endsWith(".png")) return <ImageIcon className="h-4 w-4" />;
     return <FileIcon className="h-4 w-4" />;
   };
 
@@ -47,14 +43,13 @@ const FileExplorer = () => {
 </head>
 <body>
     <h1>Hello from ${filename}</h1>
-    <p>This is a new file created in the Mini Web Server.</p>
 </body>
 </html>`
     });
     
     setNewFileName("");
     setNewFileContent("");
-    toast.success(`File ${filename} created`);
+    toast.success(`File created`);
   };
 
   const handleDeleteFile = (filename: string) => {
@@ -62,39 +57,38 @@ const FileExplorer = () => {
     if (selectedFile === filename) {
       setSelectedFile(null);
     }
-    toast.success(`File ${filename} deleted`);
   };
 
   return (
-    <div className="border rounded-md">
-      <div className="p-3 bg-gray-50 border-b">
+    <div className="border rounded">
+      <div className="p-2 bg-gray-50 border-b">
         <h3 className="font-medium text-sm flex items-center">
-          <FolderIcon className="h-4 w-4 mr-2" /> Server Files
+          <FolderIcon className="h-4 w-4 mr-1" /> Files
         </h3>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 h-[400px]">
+      <div className="grid grid-cols-1 md:grid-cols-2 h-[400px]">
         <div className="border-r p-3 overflow-auto">
-          <div className="space-y-2">
+          <div className="space-y-1">
             {files.length === 0 ? (
-              <div className="text-gray-500 text-sm italic p-2">
-                No files available. Create a new file to begin.
+              <div className="text-gray-500 text-sm p-2">
+                No files yet
               </div>
             ) : (
               files.map(file => (
                 <div 
                   key={file.name}
-                  className={`flex items-center justify-between p-2 rounded cursor-pointer ${selectedFile === file.name ? 'bg-blue-100' : 'hover:bg-gray-100'}`}
+                  className={`flex items-center justify-between p-1 rounded ${selectedFile === file.name ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
                   onClick={() => setSelectedFile(file.name)}
                 >
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-1">
                     {getFileIcon(file.name)}
                     <span className="text-sm">{file.name}</span>
                   </div>
                   <Button 
                     variant="ghost" 
                     size="sm" 
-                    className="h-7 opacity-60 hover:opacity-100"
+                    className="h-6 opacity-60 hover:opacity-100"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleDeleteFile(file.name);
@@ -113,43 +107,38 @@ const FileExplorer = () => {
             <TabsList className="w-full">
               <TabsTrigger value="create" className="flex-1">New File</TabsTrigger>
               <TabsTrigger value="view" className="flex-1" disabled={selectedFile === null}>
-                View File
+                View
               </TabsTrigger>
             </TabsList>
             
-            <TabsContent value="create" className="mt-4 space-y-3">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">File Name</label>
-                <Input 
-                  value={newFileName}
-                  onChange={(e) => setNewFileName(e.target.value)}
-                  placeholder="e.g., index.html"
-                />
-              </div>
+            <TabsContent value="create" className="mt-3 space-y-2">
+              <Input 
+                value={newFileName}
+                onChange={(e) => setNewFileName(e.target.value)}
+                placeholder="File name (e.g., page.html)"
+              />
               
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Content</label>
-                <textarea
-                  value={newFileContent}
-                  onChange={(e) => setNewFileContent(e.target.value)}
-                  placeholder="File content..."
-                  className="w-full h-32 p-2 border rounded text-sm font-mono"
-                />
-              </div>
+              <textarea
+                value={newFileContent}
+                onChange={(e) => setNewFileContent(e.target.value)}
+                placeholder="HTML content..."
+                className="w-full h-32 p-2 border rounded text-sm font-mono"
+              />
               
               <Button 
                 onClick={handleCreateFile} 
                 className="w-full"
+                size="sm"
               >
                 Create File
               </Button>
             </TabsContent>
             
-            <TabsContent value="view" className="mt-4">
+            <TabsContent value="view" className="mt-3">
               {selectedFile && (
-                <div className="space-y-2">
-                  <h3 className="font-medium">{selectedFile}</h3>
-                  <pre className="border rounded p-3 bg-gray-50 overflow-auto text-xs h-48">
+                <div className="space-y-1">
+                  <h3 className="text-sm font-medium">{selectedFile}</h3>
+                  <pre className="border rounded p-2 bg-gray-50 overflow-auto text-xs h-48">
                     {files.find(f => f.name === selectedFile)?.content}
                   </pre>
                 </div>
