@@ -3,7 +3,7 @@ import { useRef, useEffect } from "react";
 import { useServer } from "@/context/ServerContext";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, Check, Server, Http } from "lucide-react";
+import { AlertTriangle, Check, Server, ArrowUp, ArrowDown } from "lucide-react";
 
 const ServerLogs = () => {
   const { logs, clearLogs } = useServer();
@@ -31,8 +31,8 @@ const ServerLogs = () => {
       case "info": return <Server className="h-3 w-3" />;
       case "error": return <AlertTriangle className="h-3 w-3" />;
       case "success": return <Check className="h-3 w-3" />;
-      case "request": return <Http className="h-3 w-3 rotate-180" />;
-      case "response": return <Http className="h-3 w-3" />;
+      case "request": return <ArrowUp className="h-3 w-3" />;
+      case "response": return <ArrowDown className="h-3 w-3" />;
       default: return null;
     }
   };
