@@ -3,7 +3,7 @@ import React, { createContext, useContext, useState, ReactNode } from "react";
 
 // Define the log structure
 interface Log {
-  type: "info" | "error" | "success" | "request";
+  type: "info" | "error" | "success" | "request" | "response";
   message: string;
   timestamp: string;
 }
@@ -101,28 +101,99 @@ export const ServerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     </div>
 </body>
 </html>`
+    },
+    {
+      name: "404.html",
+      content: `<!DOCTYPE html>
+<html>
+<head>
+    <title>404 Not Found</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 20px; max-width: 800px; margin: 0 auto; }
+        h1 { color: #cc0000; }
+        .container { border: 1px solid #ddd; padding: 20px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>404 Not Found</h1>
+        <p>The requested resource could not be found on this server.</p>
+        <p>Please check the URL and try again.</p>
+        <p><a href="index.html">Return to Homepage</a></p>
+    </div>
+</body>
+</html>`
     }
   ]);
 
-  // Function to start the server
-  const startServer = () => {
+  // Function to simulate HTTP request and response
+  const simulateHTTPInteraction = (path: string) => {
     const timestamp = new Date().toLocaleTimeString();
-    setIsRunning(true);
-    addLog({ type: "success", message: `Server started on port ${serverPort}` });
     
-    // Simulate updating the preview iframe
+    // Simulate a GET request for a specific path
+    addLog({ 
+      type: "request", 
+      message: `GET ${path} HTTP/1.1\nHost: localhost:${serverPort}\nUser-Agent: Mozilla/5.0\nAccept: text/html`
+    });
+    
+    // Simulate server processing the request
+    addLog({ type: "info", message: `Processing request for ${path}` });
+    
+    // Check if file exists and simulate response
     setTimeout(() => {
-      const iframe = document.getElementById("preview-frame") as HTMLIFrameElement;
-      if (iframe) {
-        const defaultHtml = files.find(f => f.name === "index.html")?.content || "<h1>No index.html file found</h1>";
-        iframe.srcdoc = defaultHtml;
+      const file = files.find(f => f.name === path.substring(1) || (path === "/" && f.name === "index.html"));
+      
+      if (file) {
+        // File found - return 200 OK
+        addLog({ 
+          type: "response", 
+          message: `HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length: ${file.content.length}\n\n[HTML content served]`
+        });
+        
+        // Update the preview with the file content
+        const iframe = document.getElementById("preview-frame") as HTMLIFrameElement;
+        if (iframe) {
+          iframe.srcdoc = file.content;
+        }
+      } else {
+        // File not found - return 404
+        const notFoundPage = files.find(f => f.name === "404.html");
+        addLog({ 
+          type: "response", 
+          message: `HTTP/1.1 404 Not Found\nContent-Type: text/html\n\n[404 Page content served]`
+        });
+        
+        // Update the preview with the 404 page
+        const iframe = document.getElementById("preview-frame") as HTMLIFrameElement;
+        if (iframe) {
+          iframe.srcdoc = notFoundPage ? notFoundPage.content : "<h1>404 Not Found</h1>";
+        }
       }
     }, 500);
+  };
+
+  // Function to start the server
+  const startServer = () => {
+    setIsRunning(true);
+    addLog({ type: "info", message: `Server started on port ${serverPort}` });
+    addLog({ type: "success", message: `Socket bound to 127.0.0.1:${serverPort}` });
+    addLog({ type: "info", message: "Server is listening for connections..." });
+    
+    // Simulate initial request to root
+    setTimeout(() => {
+      simulateHTTPInteraction("/");
+    }, 1000);
+    
+    // Simulate a request to a non-existent page after some time
+    setTimeout(() => {
+      simulateHTTPInteraction("/nonexistent.html");
+    }, 3000);
   };
 
   // Function to stop the server
   const stopServer = () => {
     setIsRunning(false);
+    addLog({ type: "info", message: "Socket closed" });
     addLog({ type: "info", message: "Server stopped" });
     
     // Clear the preview iframe
@@ -155,10 +226,7 @@ export const ServerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     
     // If the server is running and this is index.html, update the preview
     if (isRunning && file.name === "index.html") {
-      const iframe = document.getElementById("preview-frame") as HTMLIFrameElement;
-      if (iframe) {
-        iframe.srcdoc = file.content;
-      }
+      simulateHTTPInteraction("/index.html");
     }
   };
 
